@@ -3,6 +3,7 @@ package controller;
 import controller.game.GameLobby;
 import event.EventVisitor;
 import model.Board;
+import model.User;
 import model.game.Game;
 import model.game.Side;
 import response.Response;
@@ -10,14 +11,15 @@ import response.ResponseSender;
 
 public class ClientHandler extends Thread implements EventVisitor
 {
-    private final ResponseSender sender;
+    private final ResponseSender responseSender;
     private final GameLobby gameLobby;
+    private User user;
     private Game game;
     private Side side;
 
-    public ClientHandler(ResponseSender sender, GameLobby gameLobby)
+    public ClientHandler(ResponseSender responseSender, GameLobby gameLobby)
     {
-        this.sender = sender;
+        this.responseSender = responseSender;
         this.gameLobby = gameLobby;
     }
 
@@ -30,6 +32,13 @@ public class ClientHandler extends Thread implements EventVisitor
     {
         this.game = game;
     }
+
+    public User getUser()
+    {
+        return user;
+    }
+
+    // TODO fill these functions
 
     @Override
     public Response login(String username, String password)

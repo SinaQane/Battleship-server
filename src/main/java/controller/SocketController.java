@@ -1,15 +1,23 @@
 package controller;
 
+import config.Config;
+import constants.Constants;
 import controller.game.GameLobby;
 import response.SocketResponseSender;
 
 import java.io.IOException;
-import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 
 public class SocketController extends Thread
 {
+    private final Config config;
+
+    public SocketController(Config config)
+    {
+        this.config = config;
+    }
+
     @Override
     public void run()
     {
@@ -17,9 +25,8 @@ public class SocketController extends Thread
         ServerSocket serverSocket = null;
         try
         {
-            // TODO read address and port from file
-            serverSocket = new ServerSocket(Constants.DEFAULT_PORT, 50,
-                    InetAddress.getByName(Constants.DEFAULT_ADDRESS));
+            int port = config.getProperty(Integer.class, "port").orElse(Constants.DEFAULT_PORT);
+            serverSocket = new ServerSocket(port);
         }
         catch (IOException e)
         {

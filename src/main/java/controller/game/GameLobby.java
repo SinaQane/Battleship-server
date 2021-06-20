@@ -12,17 +12,17 @@ public class GameLobby
     {
         if (waiting == null)
         {
-            waiting = clientHandler;
             clientHandler.setSide(Side.PLAYER_ONE);
+            waiting = clientHandler;
         }
         else
         {
             if (waiting != clientHandler)
             {
-                Game game = null; // TODO = new Game(playerOne, playerTwo);
+                Game game = new Game(waiting.getUser(), clientHandler.getUser());
                 clientHandler.setSide(Side.PLAYER_TWO);
-                waiting.setGame(game);
                 clientHandler.setGame(game);
+                waiting.setGame(game);
                 waiting = null;
             }
         }
