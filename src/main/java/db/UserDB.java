@@ -8,6 +8,9 @@ import model.User;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Objects;
 
 public class UserDB
 {
@@ -34,15 +37,33 @@ public class UserDB
 
     public User get(String username)
     {
-        String path = Constants.USERS_ADDRESS + "/" + username;
-        User result;
         try
         {
-            result = gson.fromJson(Files.readString(Paths.get(path)), User.class);
+            String path = Constants.USERS_ADDRESS + "/" + username;
+            return gson.fromJson(Files.readString(Paths.get(path)), User.class);
         }
         catch (IOException e)
         {
-            result = null;
+            return null;
+        }
+    }
+
+    public List<User> getALl()
+    {
+        List<User> result = new LinkedList<>();
+        File usersDirectory = new File(Constants.USERS_ADDRESS);
+        for (String username : Objects.requireNonNull(usersDirectory.list()))
+        {
+            try
+            {
+                String jsonString = Files.readString(Paths.get(Constants.USERS_ADDRESS + "/" + username));
+                User tempUser = gson.fromJson(jsonString, User.class);
+                result.add(tempUser);
+            }
+            catch (IOException e)
+            {
+                e.printStackTrace();
+            }
         }
         return result;
     }

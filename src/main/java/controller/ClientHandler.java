@@ -1,6 +1,7 @@
 package controller;
 
 import controller.game.GameLobby;
+import db.UserDB;
 import event.EventVisitor;
 import model.Board;
 import model.User;
@@ -8,24 +9,36 @@ import model.game.Game;
 import model.game.Side;
 import response.Response;
 import response.ResponseSender;
+import response.responses.authentication.LoginResponse;
+import response.responses.authentication.LogoutResponse;
+import response.responses.authentication.SignupResponse;
+import response.responses.gameplay.GameplayResponse;
+import response.responses.menu.GamesListResponse;
+import response.responses.menu.ScoreboardResponse;
+import response.responses.menu.ViewGameResponse;
+import response.responses.startgame.PickBoardResponse;
+import util.TokenGenerator;
+
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.LinkedList;
+import java.util.List;
 
 public class ClientHandler extends Thread implements EventVisitor
 {
+    public static List<Game> allGames = new LinkedList<>();
+
+    private final TokenGenerator tokenGenerator = new TokenGenerator();
     private final ResponseSender responseSender;
     private final GameLobby gameLobby;
+    private String authToken;
     private User user;
     private Game game;
-    private Side side;
 
     public ClientHandler(ResponseSender responseSender, GameLobby gameLobby)
     {
         this.responseSender = responseSender;
         this.gameLobby = gameLobby;
-    }
-
-    public void setSide(Side side)
-    {
-        this.side = side;
     }
 
     public void setGame(Game game)
@@ -38,64 +51,116 @@ public class ClientHandler extends Thread implements EventVisitor
         return user;
     }
 
-    // TODO fill these functions
+    @Override
+    public Response timeout(String kind)
+    {
+        return null;
+    }
 
     @Override
     public Response login(String username, String password)
     {
-        return null;
+        User requestedUser = UserDB.getUserDB().get(username);
+        if (! requestedUser.getPassword().equals(password))
+        {
+            return new LoginResponse("wrong password", "");
+        }
+        authToken = tokenGenerator.newToken();
+        user = requestedUser;
+        user.login();
+        UserDB.getUserDB().save(user);
+        return new LoginResponse("login successful", authToken);
     }
 
     @Override
     public Response signup(String username, String password)
     {
-        return null;
+        if (UserDB.getUserDB().exists(username))
+        {
+            return new SignupResponse("duplicate username");
+        }
+        user = new User(username, password);
+        UserDB.getUserDB().save(user);
+        return new SignupResponse("sign-up successful");
     }
 
     @Override
-    public Response logout(String authToken) {
-        return null;
+    public Response logout(String authToken)
+    {
+        if (!authToken.equals(this.authToken))
+        {
+            return new LogoutResponse("invalid token");
+        }
+        user.logout();
+        UserDB.getUserDB().save(user);
+        user = null;
+        return new LogoutResponse("logout successful");
     }
 
     @Override
     public Response gameMove(String authToken, int x, int y)
     {
+        if (!authToken.equals(this.authToken))
+        {
+            return new LogoutResponse("invalid token");
+        }
         return null;
     }
 
     @Override
     public Response getBoard(String authToken)
     {
-        return null;
+        if (!authToken.equals(this.authToken))
+        {
+            return new GameplayResponse(null);
+        }
+        if (game.getResult() != -1)
+        {
+            Side tempSide = game.getResult() == 0 ? Side.PLAYER_ONE : Side.PLAYER_TWO;
+            game.setGameMessage("player " + game.getPlayer(tempSide).getUsername() + " won");
+            game.endGame();
+        }
+        return new GameplayResponse(game);
     }
 
     @Override
     public Response gamesList()
     {
-        return null;
+        return new GamesListResponse((Game[]) allGames.toArray());
     }
 
     @Override
     public Response scoreboard()
     {
-        return null;
+        List<User> users = UserDB.getUserDB().getALl();
+        users.sort(Comparator.comparing(User::getScore));
+        return new ScoreboardResponse((User[]) users.toArray());
     }
 
     @Override
     public Response viewGame(Game game)
     {
-        return null;
+        return new ViewGameResponse(game);
     }
 
     @Override
     public Response pickBoard(String authToken)
     {
+        if (!authToken.equals(this.authToken))
+        {
+            return new PickBoardResponse(null);
+        }
         return null;
     }
 
     @Override
     public Response startGame(String authToken, Board board)
     {
+        if (!authToken.equals(this.authToken))
+        {
+            return new LogoutResponse("invalid token");
+            // gameLobby.startGameRequest(this);
+        }
         return null;
     }
 }
