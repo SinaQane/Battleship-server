@@ -18,6 +18,7 @@ import response.responses.menu.GamesListResponse;
 import response.responses.menu.ScoreboardResponse;
 import response.responses.menu.ViewGameResponse;
 import response.responses.startgame.PickBoardResponse;
+import response.responses.startgame.StartGameResponse;
 import util.TokenGenerator;
 
 import java.util.Comparator;
@@ -34,6 +35,7 @@ public class ClientHandler extends Thread implements EventVisitor
     private String authToken;
     private User user;
     private Game game;
+    private Side side;
 
     public ClientHandler(ResponseSender responseSender, GameLobby gameLobby)
     {
@@ -51,9 +53,36 @@ public class ClientHandler extends Thread implements EventVisitor
         return user;
     }
 
+    public void setSide(Side side)
+    {
+        this.side = side;
+    }
+
+    @Override
+    public void run()
+    {
+        while (true)
+        {
+            try
+            {
+                responseSender.sendResponse(responseSender.getEvent().visit(this));
+            }
+            catch (Exception e)
+            {
+                e.printStackTrace();
+                break;
+            }
+        }
+    }
+
     @Override
     public Response timeout(String kind)
     {
+        if (kind.equals("game move"))
+        {
+            game.nextTurn();
+            return new GameplayResponse(game);
+        } // TODO else if (kind.equals("board selection")) ? (can be handled in client tho)
         return null;
     }
 
@@ -61,9 +90,13 @@ public class ClientHandler extends Thread implements EventVisitor
     public Response login(String username, String password)
     {
         User requestedUser = UserDB.getUserDB().get(username);
-        if (! requestedUser.getPassword().equals(password))
+        if (!requestedUser.getPassword().equals(password))
         {
             return new LoginResponse("wrong password", "");
+        }
+        if (requestedUser.isOnline())
+        {
+            return new LoginResponse("already online", "");
         }
         authToken = tokenGenerator.newToken();
         user = requestedUser;
@@ -77,11 +110,11 @@ public class ClientHandler extends Thread implements EventVisitor
     {
         if (UserDB.getUserDB().exists(username))
         {
-            return new SignupResponse("duplicate username");
+            return new SignupResponse("already picked");
         }
         user = new User(username, password);
         UserDB.getUserDB().save(user);
-        return new SignupResponse("sign-up successful");
+        return new SignupResponse("signup successful");
     }
 
     @Override
@@ -102,9 +135,22 @@ public class ClientHandler extends Thread implements EventVisitor
     {
         if (!authToken.equals(this.authToken))
         {
-            return new LogoutResponse("invalid token");
+            return new GameplayResponse(null);
         }
-        return null;
+        else if (x == -1 && y == -1) // User didn't make a move
+        {
+            game.nextTurn();
+            return new GameplayResponse(game);
+        }
+        else // User wants to drop bomb on a cell
+        {
+            if (0 <= x & x <= 9 & 0 <= y & y <= 9 &&
+                    !game.getBoard(side.getRival()).getCell(x, y).getShip().isDestroyed())
+            {
+                game.dropBomb(side, x, y);
+            }
+            return new GameplayResponse(game);
+        }
     }
 
     @Override
@@ -159,8 +205,8 @@ public class ClientHandler extends Thread implements EventVisitor
         if (!authToken.equals(this.authToken))
         {
             return new LogoutResponse("invalid token");
-            // gameLobby.startGameRequest(this);
         }
-        return null;
+        gameLobby.startGameRequest(this);
+        return new StartGameResponse(game);
     }
 }
