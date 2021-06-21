@@ -1,6 +1,7 @@
 package controller;
 
 import controller.game.GameLobby;
+import db.BoardDB;
 import db.UserDB;
 import event.EventVisitor;
 import model.Board;
@@ -19,7 +20,6 @@ import response.responses.menu.ViewGameResponse;
 import response.responses.startgame.PickBoardResponse;
 import util.TokenGenerator;
 
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
@@ -150,7 +150,7 @@ public class ClientHandler extends Thread implements EventVisitor
         {
             return new PickBoardResponse(null);
         }
-        return null;
+        return new PickBoardResponse(BoardDB.getBoardDB().getBoards());
     }
 
     @Override
