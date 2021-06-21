@@ -111,7 +111,7 @@ public class ClientHandler extends Thread implements EventVisitor
     {
         if (UserDB.getUserDB().exists(username))
         {
-            return new SignupResponse("already picked");
+            return new SignupResponse("already taken");
         }
         user = new User(username, password);
         UserDB.getUserDB().save(user);
