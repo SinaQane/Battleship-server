@@ -27,7 +27,7 @@ import java.util.List;
 
 public class ClientHandler extends Thread implements EventVisitor
 {
-    public static List<Game> allGames = new LinkedList<>();
+    public static final List<Game> allGames = new LinkedList<>();
 
     private final TokenGenerator tokenGenerator = new TokenGenerator();
     private final ResponseSender responseSender;
@@ -46,6 +46,7 @@ public class ClientHandler extends Thread implements EventVisitor
     public void setGame(Game game)
     {
         this.game = game;
+        allGames.add(game);
     }
 
     public User getUser()
