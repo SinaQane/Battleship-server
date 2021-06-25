@@ -83,7 +83,8 @@ public class ClientHandler extends Thread implements EventVisitor
         {
             game.nextTurn();
             return new GameplayResponse(game);
-        } // TODO else if (kind.equals("board selection")) ? (can be handled in client tho)
+        }
+        // TODO else if (kind.equals("board selection")) ? (can be handled in client tho)
         return null;
     }
 
@@ -93,17 +94,17 @@ public class ClientHandler extends Thread implements EventVisitor
         User requestedUser = UserDB.getUserDB().get(username);
         if (!requestedUser.getPassword().equals(password))
         {
-            return new LoginResponse("wrong password", "");
+            return new LoginResponse(null, "wrong password", "");
         }
         if (requestedUser.isOnline())
         {
-            return new LoginResponse("already online", "");
+            return new LoginResponse(null, "already online", "");
         }
         authToken = tokenGenerator.newToken();
         user = requestedUser;
         user.login();
         UserDB.getUserDB().save(user);
-        return new LoginResponse("login successful", authToken);
+        return new LoginResponse(user, "login successful", authToken);
     }
 
     @Override
@@ -165,6 +166,7 @@ public class ClientHandler extends Thread implements EventVisitor
         {
             Side tempSide = game.getResult() == 0 ? Side.PLAYER_ONE : Side.PLAYER_TWO;
             game.setGameMessage("player " + game.getPlayer(tempSide).getUsername() + " won");
+            allGames.remove(game);
             game.endGame();
         }
         return new GameplayResponse(game);
