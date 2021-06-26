@@ -187,9 +187,9 @@ public class ClientHandler extends Thread implements EventVisitor
     }
 
     @Override
-    public Response viewGame(Game game)
+    public Response viewGame(int index)
     {
-        return new ViewGameResponse(game);
+        return new ViewGameResponse(allGames.get(index));
     }
 
     @Override
