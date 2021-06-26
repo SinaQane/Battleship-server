@@ -14,6 +14,7 @@ import response.responses.authentication.LoginResponse;
 import response.responses.authentication.LogoutResponse;
 import response.responses.authentication.SignupResponse;
 import response.responses.gameplay.GameplayResponse;
+import response.responses.menu.ChangeFrameResponse;
 import response.responses.menu.GamesListResponse;
 import response.responses.menu.ScoreboardResponse;
 import response.responses.menu.ViewGameResponse;
@@ -190,6 +191,12 @@ public class ClientHandler extends Thread implements EventVisitor
     public Response viewGame(int index)
     {
         return new ViewGameResponse(allGames.get(index));
+    }
+
+    @Override
+    public Response changeFrame(String frame)
+    {
+        return new ChangeFrameResponse(frame);
     }
 
     @Override
