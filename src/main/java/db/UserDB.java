@@ -32,7 +32,7 @@ public class UserDB
 
     public boolean exists(String username)
     {
-        return get(username) == null;
+        return get(username) != null;
     }
 
     public User get(String username)
