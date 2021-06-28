@@ -78,18 +78,6 @@ public class ClientHandler extends Thread implements EventVisitor
     }
 
     @Override
-    public Response timeout(String kind)
-    {
-        if (kind.equals("game move"))
-        {
-            game.nextTurn();
-            return new GameplayResponse(game);
-        }
-        // TODO else if (kind.equals("board selection")) ? (can be handled in client tho)
-        return null;
-    }
-
-    @Override
     public Response login(String username, String password)
     {
         User requestedUser = UserDB.getUserDB().get(username);
@@ -138,7 +126,7 @@ public class ClientHandler extends Thread implements EventVisitor
     {
         if (!authToken.equals(this.authToken))
         {
-            return new GameplayResponse(null);
+            return new GameplayResponse(game);
         }
         else if (x == -1 && y == -1) // User didn't make a move
         {
@@ -167,6 +155,8 @@ public class ClientHandler extends Thread implements EventVisitor
         {
             Side tempSide = game.getResult() == 0 ? Side.PLAYER_ONE : Side.PLAYER_TWO;
             game.setGameMessage("player " + game.getPlayer(tempSide).getUsername() + " won");
+            UserDB.getUserDB().save(game.getPlayer(Side.PLAYER_ONE));
+            UserDB.getUserDB().save(game.getPlayer(Side.PLAYER_TWO));
             allGames.remove(game);
             game.endGame();
         }
@@ -227,6 +217,24 @@ public class ClientHandler extends Thread implements EventVisitor
             return new LogoutResponse("invalid token");
         }
         gameLobby.startGameRequest(this);
-        return new StartGameResponse(game);
+        if (side.equals(Side.PLAYER_ONE))
+        {
+            return new StartGameResponse(game, 1);
+        }
+        return new StartGameResponse(game, 2);
+    }
+
+    @Override
+    public Response resign(String authToken)
+    {
+        if (authToken.equals(this.authToken))
+        {
+            game.resign(side);
+            UserDB.getUserDB().save(game.getPlayer(Side.PLAYER_ONE));
+            UserDB.getUserDB().save(game.getPlayer(Side.PLAYER_TWO));
+            allGames.remove(game);
+            return new ChangeFrameResponse("mainMenu");
+        }
+        return new GameplayResponse(game);
     }
 }
