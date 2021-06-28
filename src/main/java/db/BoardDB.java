@@ -28,7 +28,7 @@ public class BoardDB
     public Board[] getBoards()
     {
         Random randomGenerator = new Random();
-        List<Board> boards = new LinkedList<>();
+        Board[] boards = new Board[3];
         List<Integer> randomNumbers = new LinkedList<>();
         while (randomNumbers.size() < 3)
         {
@@ -38,6 +38,7 @@ public class BoardDB
                 randomNumbers.add(random);
             }
         }
+        int index = -1;
         for (Integer i : randomNumbers)
         {
             Board board = new Board();
@@ -49,21 +50,22 @@ public class BoardDB
                 {
                     String[] shipString = scanner.nextLine().split(" ");
                     List<Integer[]> coordinates = new LinkedList<>();
-                    coordinates.add(new Integer[]{Integer.parseInt(shipString[1]), Integer.parseInt(shipString[2])});
+                    coordinates.add(new Integer[]{Integer.parseInt(shipString[1]) - 1, Integer.parseInt(shipString[2]) - 1});
                     for (int k = 1; k < Integer.parseInt(shipString[0]); k++)
                     {
                         if (shipString[3].equals("V"))
                         {
-                            coordinates.add(new Integer[]{Integer.parseInt(shipString[1]), Integer.parseInt(shipString[2]) + k});
+                            coordinates.add(new Integer[]{Integer.parseInt(shipString[1]) - 1, Integer.parseInt(shipString[2]) + k - 1});
                         }
                         else
                         {
-                            coordinates.add(new Integer[]{Integer.parseInt(shipString[1]) + k, Integer.parseInt(shipString[2])});
+                            coordinates.add(new Integer[]{Integer.parseInt(shipString[1]) + k - 1, Integer.parseInt(shipString[2]) - 1});
                         }
                     }
                     board.setShip(coordinates);
-                    boards.add(board);
                 }
+                index++;
+                boards[index] = board;
                 scanner.close();
             }
             catch (FileNotFoundException e)
@@ -71,6 +73,6 @@ public class BoardDB
                 e.printStackTrace();
             }
         }
-        return (Board[]) boards.toArray();
+        return boards;
     }
 }

@@ -2,8 +2,8 @@ controller/SocketController.java
  controller.SocketController
 util/TokenGenerator.java
  util.TokenGenerator
-response/SocketResponseSender.java
- response.SocketResponseSender
+controller/ClientHandler.java
+ controller.ClientHandler
 Main.java
  Main
 response/ResponseSender.java
@@ -14,7 +14,7 @@ db/BoardDB.java
  db.BoardDB
 constants/ServerConstants.java
  constants.ServerConstants
-controller/ClientHandler.java
- controller.ClientHandler
+response/SocketResponseSender.java
+ response.SocketResponseSender
 db/UserDB.java
  db.UserDB

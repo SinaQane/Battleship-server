@@ -148,7 +148,7 @@ public class ClientHandler extends Thread implements EventVisitor
         else // User wants to drop bomb on a cell
         {
             if (0 <= x & x <= 9 & 0 <= y & y <= 9 &&
-                    !game.getBoard(side.getRival()).getCell(x, y).getShip().isDestroyed())
+                    !game.getBoard(side.getRival()).getCell(x, y).isBombed())
             {
                 game.dropBomb(side, x, y);
             }
