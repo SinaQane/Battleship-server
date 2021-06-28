@@ -1,20 +1,20 @@
-controller/SocketController.java
- controller.SocketController
+db/UserDB.java
+ db.UserDB
 util/TokenGenerator.java
  util.TokenGenerator
-controller/ClientHandler.java
- controller.ClientHandler
+response/SocketResponseSender.java
+ response.SocketResponseSender
 Main.java
  Main
 response/ResponseSender.java
  response.ResponseSender
-controller/game/GameLobby.java
- controller.game.GameLobby
-db/BoardDB.java
- db.BoardDB
 constants/ServerConstants.java
  constants.ServerConstants
-response/SocketResponseSender.java
- response.SocketResponseSender
-db/UserDB.java
- db.UserDB
+db/BoardDB.java
+ db.BoardDB
+controller/SocketController.java
+ controller.SocketController
+controller/ClientHandler.java
+ controller.ClientHandler
+controller/game/GameLobby.java
+ controller.game.GameLobby

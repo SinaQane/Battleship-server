@@ -176,7 +176,12 @@ public class ClientHandler extends Thread implements EventVisitor
     @Override
     public Response gamesList()
     {
-        return new GamesListResponse((Game[]) allGames.toArray());
+        Game[] games = new Game[allGames.size()];
+        for (int i = 0; i < allGames.size(); i++)
+        {
+            games[i] = allGames.get(i);
+        }
+        return new GamesListResponse(games);
     }
 
     @Override
@@ -184,7 +189,12 @@ public class ClientHandler extends Thread implements EventVisitor
     {
         List<User> users = UserDB.getUserDB().getALl();
         users.sort(Comparator.comparing(User::getScore));
-        return new ScoreboardResponse((User[]) users.toArray());
+        User[] usersArray = new User[users.size()];
+        for (int i = 0; i < users.size(); i++)
+        {
+            usersArray[i] = users.get(i);
+        }
+        return new ScoreboardResponse(usersArray);
     }
 
     @Override
