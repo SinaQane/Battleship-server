@@ -105,7 +105,7 @@ public class ClientHandler extends Thread implements EventVisitor
         user = requestedUser;
         user.login();
         UserDB.getUserDB().save(user);
-        return new LoginResponse(user, "login successful", authToken);
+        return new LoginResponse(user, "", authToken);
     }
 
     @Override
@@ -117,7 +117,7 @@ public class ClientHandler extends Thread implements EventVisitor
         }
         user = new User(username, password);
         UserDB.getUserDB().save(user);
-        return new SignupResponse("signup successful");
+        return new SignupResponse("");
     }
 
     @Override
@@ -130,7 +130,7 @@ public class ClientHandler extends Thread implements EventVisitor
         user.logout();
         UserDB.getUserDB().save(user);
         user = null;
-        return new LogoutResponse("logout successful");
+        return new LogoutResponse("");
     }
 
     @Override

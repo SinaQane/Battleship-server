@@ -1,6 +1,6 @@
 package constants;
 
-public class Constants
+public class ServerConstants
 {
     public static final String CONFIG_ADDRESS = "./src/main/resources/server.properties";
     public static final String BOARDS_ADDRESS = "./src/main/resources/boards";

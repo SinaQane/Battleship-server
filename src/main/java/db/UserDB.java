@@ -2,7 +2,7 @@ package db;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import constants.Constants;
+import constants.ServerConstants;
 import model.User;
 
 import java.io.*;
@@ -39,7 +39,7 @@ public class UserDB
     {
         try
         {
-            String path = Constants.USERS_ADDRESS + "/" + username;
+            String path = ServerConstants.USERS_ADDRESS + "/" + username;
             return gson.fromJson(Files.readString(Paths.get(path)), User.class);
         }
         catch (IOException e)
@@ -51,12 +51,12 @@ public class UserDB
     public List<User> getALl()
     {
         List<User> result = new LinkedList<>();
-        File usersDirectory = new File(Constants.USERS_ADDRESS);
+        File usersDirectory = new File(ServerConstants.USERS_ADDRESS);
         for (String username : Objects.requireNonNull(usersDirectory.list()))
         {
             try
             {
-                String jsonString = Files.readString(Paths.get(Constants.USERS_ADDRESS + "/" + username));
+                String jsonString = Files.readString(Paths.get(ServerConstants.USERS_ADDRESS + "/" + username));
                 User tempUser = gson.fromJson(jsonString, User.class);
                 result.add(tempUser);
             }
@@ -70,7 +70,7 @@ public class UserDB
 
     public void save(User user)
     {
-        String path = Constants.USERS_ADDRESS + "/" + user.getUsername();
+        String path = ServerConstants.USERS_ADDRESS + "/" + user.getUsername();
         File file = new File(path);
         if(file.getParentFile().mkdirs())
         {

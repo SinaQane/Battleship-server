@@ -1,7 +1,7 @@
 package controller;
 
 import config.Config;
-import constants.Constants;
+import constants.ServerConstants;
 import controller.game.GameLobby;
 import response.SocketResponseSender;
 
@@ -25,7 +25,7 @@ public class SocketController extends Thread
         ServerSocket serverSocket = null;
         try
         {
-            int port = config.getProperty(Integer.class, "port").orElse(Constants.DEFAULT_PORT);
+            int port = config.getProperty(Integer.class, "port").orElse(ServerConstants.DEFAULT_PORT);
             serverSocket = new ServerSocket(port);
         }
         catch (IOException e)

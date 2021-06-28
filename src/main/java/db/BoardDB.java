@@ -1,6 +1,6 @@
 package db;
 
-import constants.Constants;
+import constants.ServerConstants;
 import model.Board;
 
 import java.io.File;
@@ -43,7 +43,7 @@ public class BoardDB
             Board board = new Board();
             try
             {
-                File boardFile = new File(Constants.BOARDS_ADDRESS + "/" + i + ".board");
+                File boardFile = new File(ServerConstants.BOARDS_ADDRESS + "/" + i + ".board");
                 Scanner scanner = new Scanner(boardFile);
                 for (int j = 0; j < 10; j++)
                 {
