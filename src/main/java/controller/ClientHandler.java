@@ -50,9 +50,16 @@ public class ClientHandler extends Thread implements EventVisitor
     public void setGame(Game game)
     {
         this.game = game;
-        if (!allGames.contains(game))
+        synchronized (allGames)
         {
-            allGames.add(game);
+            if (!allGames.contains(game))
+            {
+                allGames.add(game);
+            }
+            else
+            {
+                allGames.set(allGames.indexOf(game), game);
+            }
         }
     }
 
@@ -88,6 +95,10 @@ public class ClientHandler extends Thread implements EventVisitor
     @Override
     public Response login(String username, String password)
     {
+        if (!UserDB.getUserDB().exists(username))
+        {
+            return new LoginResponse(null, "wrong username", "");
+        }
         User requestedUser = UserDB.getUserDB().get(username);
         if (!requestedUser.getPassword().equals(password))
         {
@@ -225,10 +236,14 @@ public class ClientHandler extends Thread implements EventVisitor
     @Override
     public Response gamesList()
     {
-        Game[] games = new Game[allGames.size()];
-        for (int i = 0; i < allGames.size(); i++)
+        Game[] games;
+        synchronized (allGames)
         {
-            games[i] = allGames.get(i);
+            games = new Game[allGames.size()];
+            for (int i = 0; i < allGames.size(); i++)
+            {
+                games[i] = allGames.get(i);
+            }
         }
         return new GamesListResponse(games);
     }
@@ -249,14 +264,22 @@ public class ClientHandler extends Thread implements EventVisitor
     @Override
     public Response viewGame(int index)
     {
-        game = allGames.get(index);
-        return new ViewGameResponse(game);
+        Game viewingGame;
+        synchronized (allGames)
+        {
+            viewingGame = allGames.get(index - 1);
+        }
+        System.out.println(viewingGame.getPlayer(Side.PLAYER_ONE).getUsername() + " " + viewingGame.getPlayer(Side.PLAYER_TWO).getUsername());
+        return new ViewGameResponse(viewingGame);
     }
 
     @Override
     public Response changeFrame(String frame)
     {
-        allGames.remove(game);
+        synchronized (allGames)
+        {
+            allGames.remove(game);
+        }
         game = null;
         return new ChangeFrameResponse(frame);
     }
@@ -294,7 +317,10 @@ public class ClientHandler extends Thread implements EventVisitor
             game.resign(side);
             UserDB.getUserDB().save(game.getPlayer(Side.PLAYER_ONE));
             UserDB.getUserDB().save(game.getPlayer(Side.PLAYER_TWO));
-            allGames.remove(game);
+            synchronized (allGames)
+            {
+                allGames.remove(game);
+            }
             game = null;
             return new ChangeFrameResponse("mainMenu");
         }
