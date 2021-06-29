@@ -32,7 +32,6 @@ public class ClientHandler extends Thread implements EventVisitor
 
     private final TokenGenerator tokenGenerator = new TokenGenerator();
     private final ResponseSender responseSender;
-    private final Object lock = new Object();
     private final GameLobby gameLobby;
     private String authToken;
     private User user;
@@ -48,10 +47,9 @@ public class ClientHandler extends Thread implements EventVisitor
     public void setGame(Game game)
     {
         this.game = game;
-        allGames.add(game);
-        synchronized (lock)
+        if (!allGames.contains(game))
         {
-            lock.notifyAll();
+            allGames.add(game);
         }
     }
 
@@ -156,15 +154,16 @@ public class ClientHandler extends Thread implements EventVisitor
         {
             return new GameplayResponse(null);
         }
-        if (game.getResult() != -1)
+        if (game != null)
         {
-            Side tempSide = game.getResult() == 0 ? Side.PLAYER_ONE : Side.PLAYER_TWO;
-            game.setGameMessage("player " + game.getPlayer(tempSide).getUsername() + " won");
-            UserDB.getUserDB().save(game.getPlayer(Side.PLAYER_ONE));
-            UserDB.getUserDB().save(game.getPlayer(Side.PLAYER_TWO));
-            allGames.remove(game);
-            game.endGame();
-            game = null;
+            if (game.getResult() != -1)
+            {
+                Side tempSide = game.getResult() == 0 ? Side.PLAYER_ONE : Side.PLAYER_TWO;
+                game.setGameMessage("player " + game.getPlayer(tempSide).getUsername() + " won");
+                UserDB.getUserDB().save(game.getPlayer(Side.PLAYER_ONE));
+                UserDB.getUserDB().save(game.getPlayer(Side.PLAYER_TWO));
+                game.endGame();
+            }
         }
         return new GameplayResponse(game);
     }
@@ -203,6 +202,7 @@ public class ClientHandler extends Thread implements EventVisitor
     @Override
     public Response changeFrame(String frame)
     {
+        allGames.remove(game);
         game = null;
         return new ChangeFrameResponse(frame);
     }
@@ -220,20 +220,9 @@ public class ClientHandler extends Thread implements EventVisitor
     @Override
     public Response startGame(String authToken, Board board)
     {
-        if (!authToken.equals(this.authToken))
+        if (authToken.equals(this.authToken))
         {
             gameLobby.startGameRequest(this, board);
-            synchronized (lock)
-            {
-                try
-                {
-                    lock.wait();
-                }
-                catch (InterruptedException e)
-                {
-                    e.printStackTrace();
-                }
-            }
             if (side.equals(Side.PLAYER_ONE))
             {
                 return new StartGameResponse(game, 1);

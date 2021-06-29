@@ -26,8 +26,9 @@ public class GameLobby
                 game.setBoard(0, waitingBoard);
                 game.setBoard(1, board);
                 clientHandler.setSide(Side.PLAYER_TWO);
-                clientHandler.setGame(game);
                 waiting.setGame(game);
+                clientHandler.setGame(game);
+                waitingBoard = null;
                 waiting = null;
             }
         }
