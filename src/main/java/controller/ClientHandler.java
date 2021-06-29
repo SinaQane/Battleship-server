@@ -5,7 +5,9 @@ import db.BoardDB;
 import db.UserDB;
 import event.EventVisitor;
 import model.Board;
+import model.Ship;
 import model.User;
+import model.cell.Cell;
 import model.game.Game;
 import model.game.Side;
 import response.Response;
@@ -133,7 +135,8 @@ public class ClientHandler extends Thread implements EventVisitor
         }
         else if (x == -1 && y == -1) // User didn't make a move
         {
-            game.nextTurn();
+            game.nextTurn(true);
+            game.resetTimer();
             return new GameplayResponse(game);
         }
         else // User wants to drop bomb on a cell
@@ -141,10 +144,58 @@ public class ClientHandler extends Thread implements EventVisitor
             if (0 <= x & x <= 9 & 0 <= y & y <= 9 &&
                     !game.getBoard(side.getRival()).getCell(x, y).isBombed())
             {
-                game.dropBomb(side, x, y);
+                boolean successful = game.dropBomb(side, x, y);
+                if (successful)
+                {
+                    Board rivalBoard = game.getBoard(side.getRival());
+                    for (Ship ship : rivalBoard.getShips())
+                    {
+                        if (ship.isDestroyed())
+                        {
+                            for (Cell cell : ship.getShip())
+                            {
+                                int i = cell.getCoordinates()[0];
+                                int j = cell.getCoordinates()[1];
+                                game.explosion(side, i + 1, j + 1);
+                                game.explosion(side, i , j + 1);
+                                game.explosion(side, i + 1, j );
+                                if (j > 0)
+                                {
+                                    game.explosion(side, i + 1, j - 1);
+                                    game.explosion(side, i, j - 1);
+                                }
+                                if (i > 0)
+                                {
+                                    game.explosion(side, i - 1, j + 1);
+                                    game.explosion(side, i - 1, j);
+                                }
+                                if (i > 0 && j > 0)
+                                {
+                                    game.explosion(side, i - 1, j - 1);
+                                }
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    game.nextTurn(true);
+                }
             }
+            game.resetTimer();
             return new GameplayResponse(game);
         }
+    }
+
+    @Override
+    public Response updateTimer()
+    {
+        if (game != null)
+        {
+            game.updateTimer();
+            return new GameplayResponse(game);
+        }
+        return new GameplayResponse(null);
     }
 
     @Override
@@ -160,9 +211,9 @@ public class ClientHandler extends Thread implements EventVisitor
             {
                 Side tempSide = game.getResult() == 0 ? Side.PLAYER_ONE : Side.PLAYER_TWO;
                 game.setGameMessage("player " + game.getPlayer(tempSide).getUsername() + " won");
+                if (game.isRunning()) game.endGame();
                 UserDB.getUserDB().save(game.getPlayer(Side.PLAYER_ONE));
                 UserDB.getUserDB().save(game.getPlayer(Side.PLAYER_TWO));
-                game.endGame();
             }
         }
         return new GameplayResponse(game);
