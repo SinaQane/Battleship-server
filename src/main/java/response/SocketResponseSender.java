@@ -32,7 +32,9 @@ public class SocketResponseSender implements ResponseSender
     @Override
     public Event getEvent()
     {
-        return gson.fromJson(scanner.nextLine(), Event.class);
+        String line = "null";
+        if (scanner.hasNext()) line = scanner.nextLine();
+        return gson.fromJson(line, Event.class);
     }
 
     @Override

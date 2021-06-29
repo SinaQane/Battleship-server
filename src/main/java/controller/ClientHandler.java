@@ -7,7 +7,6 @@ import event.EventVisitor;
 import model.Board;
 import model.Ship;
 import model.User;
-import model.cell.Cell;
 import model.game.Game;
 import model.game.Side;
 import response.Response;
@@ -39,11 +38,13 @@ public class ClientHandler extends Thread implements EventVisitor
     private User user;
     private Game game;
     private Side side;
+    private boolean running;
 
     public ClientHandler(ResponseSender responseSender, GameLobby gameLobby)
     {
         this.responseSender = responseSender;
         this.gameLobby = gameLobby;
+        running = true;
     }
 
     public void setGame(Game game)
@@ -68,18 +69,20 @@ public class ClientHandler extends Thread implements EventVisitor
     @Override
     public void run()
     {
-        while (true)
+        while (running)
         {
             try
             {
                 responseSender.sendResponse(responseSender.getEvent().visit(this));
             }
-            catch (Exception e)
-            {
-                e.printStackTrace();
-                break;
-            }
+            catch (Exception ignored) {}
         }
+    }
+
+    @SuppressWarnings("unused")
+    public void kill()
+    {
+        running = false;
     }
 
     @Override
@@ -150,12 +153,12 @@ public class ClientHandler extends Thread implements EventVisitor
                     Board rivalBoard = game.getBoard(side.getRival());
                     for (Ship ship : rivalBoard.getShips())
                     {
-                        if (ship.isDestroyed())
+                        if (game.isShipDestroyed(side.getRival(), ship))
                         {
-                            for (Cell cell : ship.getShip())
+                            for (Integer[] cell : ship.getShip())
                             {
-                                int i = cell.getCoordinates()[0];
-                                int j = cell.getCoordinates()[1];
+                                int i = cell[0];
+                                int j = cell[1];
                                 game.explosion(side, i + 1, j + 1);
                                 game.explosion(side, i , j + 1);
                                 game.explosion(side, i + 1, j );
@@ -238,7 +241,7 @@ public class ClientHandler extends Thread implements EventVisitor
         User[] usersArray = new User[users.size()];
         for (int i = 0; i < users.size(); i++)
         {
-            usersArray[i] = users.get(i);
+            usersArray[i] = users.get((users.size() - 1) - i);
         }
         return new ScoreboardResponse(usersArray);
     }

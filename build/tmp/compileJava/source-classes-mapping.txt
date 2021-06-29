@@ -2,12 +2,10 @@ db/UserDB.java
  db.UserDB
 util/TokenGenerator.java
  util.TokenGenerator
-db/BoardDB.java
- db.BoardDB
-Main.java
- Main
 constants/ServerConstants.java
  constants.ServerConstants
+Main.java
+ Main
 controller/SocketController.java
  controller.SocketController
 controller/ClientHandler.java
@@ -16,5 +14,7 @@ response/ResponseSender.java
  response.ResponseSender
 controller/game/GameLobby.java
  controller.game.GameLobby
+db/BoardDB.java
+ db.BoardDB
 response/SocketResponseSender.java
  response.SocketResponseSender
