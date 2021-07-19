@@ -39,6 +39,7 @@ public class ClientHandler extends Thread implements EventVisitor
     private Game game;
     private Side side;
     private boolean running;
+    private int viewingGameIndex;
 
     public ClientHandler(ResponseSender responseSender, GameLobby gameLobby)
     {
@@ -215,6 +216,15 @@ public class ClientHandler extends Thread implements EventVisitor
     @Override
     public Response getBoard(String authToken)
     {
+        if (authToken.equals("0"))
+        {
+            Game viewingGame;
+            synchronized (allGames)
+            {
+                viewingGame = allGames.get(viewingGameIndex);
+            }
+            return new GameplayResponse(viewingGame);
+        }
         if (!authToken.equals(this.authToken))
         {
             return new GameplayResponse(null);
@@ -268,8 +278,8 @@ public class ClientHandler extends Thread implements EventVisitor
         synchronized (allGames)
         {
             viewingGame = allGames.get(index - 1);
+            viewingGameIndex = index - 1;
         }
-        System.out.println(viewingGame.getPlayer(Side.PLAYER_ONE).getUsername() + " " + viewingGame.getPlayer(Side.PLAYER_TWO).getUsername());
         return new ViewGameResponse(viewingGame);
     }
 
